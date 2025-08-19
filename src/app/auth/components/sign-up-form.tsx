@@ -15,6 +15,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { useState } from "react";
+import { redirect } from "next/navigation";
+import { Loader2Icon } from "lucide-react";
 
 const formSchema = z.object({
   email: z.email(),
@@ -33,11 +37,35 @@ export function SignUpForm() {
     },
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    let isSuccess = false;
+    const { data, error } = await authClient.signUp.email(
+      {
+        email: values.email,
+        password: values.password,
+        name: values.username,
+      },
+      {
+        onRequest: (_ctx) => {
+          setLoading(true);
+        },
+        onSuccess: (_ctx) => {
+          setLoading(false);
+          isSuccess = true;
+        },
+        onError: (ctx) => {
+          setLoading(false);
+          // display the error message
+          alert(ctx.error.message);
+        },
+      }
+    );
+
+    if (isSuccess) {
+      redirect("/home");
+    }
   }
 
   return (
@@ -66,7 +94,7 @@ export function SignUpForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="password" {...field} />
+                <Input placeholder="password" type="password" {...field} />
               </FormControl>
               <FormDescription>This is your password.</FormDescription>
               <FormMessage />
@@ -87,7 +115,15 @@ export function SignUpForm() {
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2Icon className="animate-spin" /> Loading...
+            </>
+          ) : (
+            "Submit"
+          )}
+        </Button>
         <p className="text-sm">
           Already have an account?{" "}
           <Link href="/auth/sign-in" className="underline">

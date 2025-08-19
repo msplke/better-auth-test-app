@@ -15,6 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
+import { useState } from "react";
+
+import { Loader2Icon } from "lucide-react";
+import { is } from "drizzle-orm";
 
 const formSchema = z.object({
   email: z.email(),
@@ -22,7 +28,6 @@ const formSchema = z.object({
 });
 
 export function SignInForm() {
-  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -31,11 +36,34 @@ export function SignInForm() {
     },
   });
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    let isSuccess = false;
+    const { data, error } = await authClient.signIn.email(
+      {
+        email: values.email,
+        password: values.password,
+      },
+      {
+        onRequest: (_ctx) => {
+          setLoading(true);
+        },
+        onSuccess: (_ctx) => {
+          setLoading(false);
+          isSuccess = true;
+        },
+        onError: (ctx) => {
+          setLoading(false);
+          // display the error message
+          alert(ctx.error.message);
+        },
+      }
+    );
+
+    if (isSuccess) {
+      redirect("/home");
+    }
   }
 
   return (
@@ -62,14 +90,22 @@ export function SignInForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="password" {...field} />
+                <Input placeholder="password" type="password" {...field} />
               </FormControl>
               <FormDescription>This is your password.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? (
+            <>
+              <Loader2Icon className="animate-spin" /> Loading...
+            </>
+          ) : (
+            "Submit"
+          )}
+        </Button>
         <p className="text-xs">
           Don't have an account?{" "}
           <Link href="/auth/sign-up" className="underline">
