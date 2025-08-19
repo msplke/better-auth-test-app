@@ -1,4 +1,4 @@
-import { CommentForm } from "@/app/home/components/comment-form";
+import { CommentForm } from "@/app/(protected)/home/components/comment-form";
 
 export default function Home() {
   return (
