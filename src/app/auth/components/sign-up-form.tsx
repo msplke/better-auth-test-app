@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.email(),
@@ -87,6 +88,12 @@ export function SignUpForm() {
           )}
         />
         <Button type="submit">Submit</Button>
+        <p className="text-sm">
+          Already have an account?{" "}
+          <Link href="/auth/sign-in" className="underline">
+            Sign in
+          </Link>
+        </p>
       </form>
     </Form>
   );
