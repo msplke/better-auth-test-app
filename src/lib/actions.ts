@@ -23,6 +23,7 @@ export async function createComment(content: string) {
 
   try {
     await db.insert(comment).values({ authorId: currentUser.id, content });
+    revalidatePath("/home");
   } catch (e) {
     console.error(e);
     throw new Error("Database Error.");
