@@ -8,10 +8,8 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
@@ -22,7 +20,7 @@ type CommentFormProps = React.ComponentPropsWithRef<"form"> & {
   createComment: (content: string) => void;
 };
 
-export function CommentForm({ createComment, ...rest }: CommentFormProps) {
+export function CommentForm({ createComment, className }: CommentFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -33,6 +31,7 @@ export function CommentForm({ createComment, ...rest }: CommentFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       createComment(values.content);
+      form.reset();
     } catch (error) {
       console.error(error);
     }
@@ -40,11 +39,7 @@ export function CommentForm({ createComment, ...rest }: CommentFormProps) {
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="flex space-x-4"
-        {...rest}
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className={`${className}`}>
         <FormField
           control={form.control}
           name="content"
@@ -53,8 +48,9 @@ export function CommentForm({ createComment, ...rest }: CommentFormProps) {
               <FormControl>
                 <textarea
                   placeholder="Leave a comment..."
+                  rows={1}
                   {...field}
-                  className="outline-2 outline-accent border rounded-lg p-2"
+                  className="min-w-[300px] max-w-lg outline-2 outline-accent border rounded-lg p-2"
                 />
               </FormControl>
               <FormMessage />
