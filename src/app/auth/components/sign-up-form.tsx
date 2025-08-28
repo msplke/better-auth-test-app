@@ -41,17 +41,20 @@ export function SignUpForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     let isSuccess = false;
-    const { data, error } = await authClient.signUp.email(
+
+    // Returns an object containing a data and error field, but they
+    // are unused, so we do not need to store them
+    await authClient.signUp.email(
       {
         email: values.email,
         password: values.password,
         name: values.username,
       },
       {
-        onRequest: (_ctx) => {
+        onRequest: () => {
           setLoading(true);
         },
-        onSuccess: (_ctx) => {
+        onSuccess: () => {
           setLoading(false);
           isSuccess = true;
         },

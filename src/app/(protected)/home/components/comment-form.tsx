@@ -8,43 +8,50 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 const formSchema = z.object({
-  comment: z.string().nonempty(),
+  content: z.string().nonempty(),
 });
 
-export function CommentForm() {
-  // 1. Define your form.
+type CommentFormProps = React.ComponentPropsWithRef<"form"> & {
+  createComment: (content: string) => void;
+};
+
+export function CommentForm({ createComment, className }: CommentFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      comment: "",
+      content: "",
     },
   });
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    try {
+      createComment(values.content);
+      form.reset();
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className={`${className}`}>
         <FormField
           control={form.control}
-          name="comment"
+          name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Comment</FormLabel>
               <FormControl>
-                <Input placeholder="Leave a comment..." {...field} />
+                <textarea
+                  placeholder="Leave a comment..."
+                  rows={1}
+                  {...field}
+                  className="min-w-[300px] max-w-lg outline-2 outline-accent border rounded-lg p-2"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

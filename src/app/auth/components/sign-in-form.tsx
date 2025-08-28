@@ -20,7 +20,6 @@ import { redirect } from "next/navigation";
 import { useState } from "react";
 
 import { Loader2Icon } from "lucide-react";
-import { is } from "drizzle-orm";
 
 const formSchema = z.object({
   email: z.email(),
@@ -40,16 +39,18 @@ export function SignInForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     let isSuccess = false;
-    const { data, error } = await authClient.signIn.email(
+    // Returns an object containing a data and error field, but they
+    // are unused, so we do not need to store them
+    await authClient.signIn.email(
       {
         email: values.email,
         password: values.password,
       },
       {
-        onRequest: (_ctx) => {
+        onRequest: () => {
           setLoading(true);
         },
-        onSuccess: (_ctx) => {
+        onSuccess: () => {
           setLoading(false);
           isSuccess = true;
         },
@@ -107,7 +108,7 @@ export function SignInForm() {
           )}
         </Button>
         <p className="text-xs">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/auth/sign-up" className="underline">
             Sign up
           </Link>
